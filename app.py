@@ -70,22 +70,11 @@ st.markdown(
         .block-container {
             max-width: 1450px !important;
             width: 94% !important;
-            padding-top: 1.2rem;
+            padding-top: 1rem;
             padding-left: 1rem;
             padding-right: 1rem;
             padding-bottom: 4rem;
             }
-
-
-            .dashboard-title {
-            color: #012169;
-            font-size: 2.8rem;
-            font-weight: 700;
-            line-height: 1.1;
-            margin: 0;
-            }
-
-
 
         h1 {margin-bottom: 0.1rem; font-size: 2rem !important;}
         h2, h3 {font-size: 1.5rem !important;}
