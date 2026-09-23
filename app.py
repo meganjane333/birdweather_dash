@@ -87,7 +87,7 @@ st.markdown(
 
 
 
-        h1 {margin-bottom: 0.15rem; font-size: 2rem !important;}
+        h1 {margin-bottom: 0.1rem; font-size: 2rem !important;}
         h2, h3 {font-size: 1.5rem !important;}
         .subtitle {color: #52645a; font-size: 1.rem; margin-bottom: 1.35rem;}
         .live-dot {
