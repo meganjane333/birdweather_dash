@@ -6,7 +6,6 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 import streamlit as st
-import altair as alt
 
 
 API_URL = "https://app.birdweather.com/graphql"
