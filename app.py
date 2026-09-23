@@ -471,7 +471,7 @@ def render_dashboard() -> None:
         with st.container(border=True):
 
             bird_image, bird_details = st.columns(
-                [1.25, 1],
+                [1, 1],
                 gap="medium",
                 vertical_alignment="center"
             )
