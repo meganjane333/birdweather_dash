@@ -11,9 +11,10 @@ import streamlit as st
 API_URL = "https://app.birdweather.com/graphql"
 STATION_ID = "12521"
 REFRESH_SECONDS = 30
-MIN_CONFIDENCE = 0.70
-MIN_PROBABILITY = 0.70
+MIN_CONFIDENCE = 0.50
+MIN_PROBABILITY = 0.50
 LOCAL_TZ = ZoneInfo("Europe/London")
+REPEAT_WINDOW_MINUTES = 5
 
 
 QUERY = """
@@ -74,9 +75,15 @@ st.markdown(
         border-radius: 50%; background: #2e8b57; margin-right: 0.4rem;
       }
       [data-testid="stMetric"] {
-        background: #f3f7f4; border: 1px solid #dce7df;
-        border-radius: 0.8rem; padding: 0.75rem 1rem;
-      }
+  background: #245c43;
+  border: 1px solid #245c43;
+  border-radius: 0.8rem;
+  padding: 0.75rem 1rem;
+}
+
+[data-testid="stMetric"] * {
+  color: white !important;
+}
       .species-name {font-size: 2rem; font-weight: 700; line-height: 1.1;}
       .scientific-name {font-style: italic; color: #52645a; margin-bottom: 0.8rem;}
       footer {visibility: hidden;}
@@ -132,6 +139,34 @@ def flatten_detections(result: dict) -> pd.DataFrame:
         frame = frame.sort_values("timestamp", ascending=False).reset_index(drop=True)
     return frame
 
+def collapse_repeat_detections(
+    frame: pd.DataFrame,
+    window_minutes: int = REPEAT_WINDOW_MINUTES
+) -> pd.DataFrame:
+
+    if frame.empty:
+        return frame
+
+    frame = frame.sort_values(
+        ["common_name", "timestamp"],
+        ascending=[True, True]
+    ).copy()
+
+    time_since_previous = (
+        frame.groupby("common_name")["timestamp"]
+        .diff()
+    )
+
+    keep = (
+        time_since_previous.isna()
+        | (time_since_previous >= pd.Timedelta(minutes=window_minutes))
+    )
+
+    return (
+        frame.loc[keep]
+        .sort_values("timestamp", ascending=False)
+        .reset_index(drop=True)
+    )
 
 @st.cache_data(ttl=20, show_spinner=False)
 def get_today_data() -> tuple[dict, pd.DataFrame]:
@@ -175,6 +210,7 @@ def render_dashboard() -> None:
     checked_at = datetime.now(LOCAL_TZ)
     try:
         summary, detections = get_today_data()
+        detections = collapse_repeat_detections(detections)
     except Exception as error:
         st.error(
             "BirdWeather could not be reached on this refresh. "
@@ -187,6 +223,7 @@ def render_dashboard() -> None:
     if detections.empty:
         try:
             _, detections = get_archive_preview()
+            detections = collapse_repeat_detections(detections)
             showing_archive = not detections.empty
         except Exception:
             detections = pd.DataFrame()
@@ -216,11 +253,10 @@ def render_dashboard() -> None:
             "new detections will appear here automatically."
         )
 
-    metrics = st.columns(3)
-    metrics[0].metric("Detections · last 24 hours", int(summary.get("totalCount", 0)))
-    metrics[1].metric("Species · last 24 hours", int(summary.get("speciesCount", 0)))
-    metrics[2].metric("Refresh interval", f"{REFRESH_SECONDS} sec")
-
+    metrics = st.columns(2)
+    metrics[0].metric("Total Detections · last 24 hours", int(summary.get("totalCount", 0)))
+    metrics[1].metric("Total Species · last 24 hours", int(summary.get("speciesCount", 0)))
+    
     if detections.empty:
         return
 
@@ -242,7 +278,7 @@ def render_dashboard() -> None:
         )
 
     with right:
-        st.subheader("Recent detections" if not showing_archive else "Archive preview")
+        st.subheader("Recent detection events" if not showing_archive else "Archive preview")
         st.dataframe(
             recent_table(detections),
             hide_index=True,
@@ -251,7 +287,7 @@ def render_dashboard() -> None:
         )
 
     if not showing_archive:
-        st.subheader("Most frequently detected today")
+        st.subheader("Most frequent detection events today")
         top_species = (
             detections.groupby("common_name")
             .size()
@@ -262,8 +298,11 @@ def render_dashboard() -> None:
         st.bar_chart(top_species, horizontal=True, color="#2e8b57")
 
     st.caption(
-        "Only detections with confidence and probability of at least 70% are shown. "
+        f"Only detections with confidence and probability of at least "
+        f"{MIN_CONFIDENCE:.0%} and {MIN_PROBABILITY:.0%}, respectively, are shown. "
         "Automated acoustic classifications should be treated as indicative until verified."
+        f"Repeated detections of the same species within "
+        f"{REPEAT_WINDOW_MINUTES} minutes are displayed as one event. "
     )
 
 
