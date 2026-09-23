@@ -6,10 +6,11 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import requests
 import streamlit as st
+import altair as alt
 
 
 API_URL = "https://app.birdweather.com/graphql"
-STATION_ID = "12521"
+STATION_IDS = ["12521", "8106"]
 REFRESH_SECONDS = 30
 MIN_CONFIDENCE = 0.50
 MIN_PROBABILITY = 0.50
@@ -58,7 +59,7 @@ query LiveDetections(
 
 
 st.set_page_config(
-    page_title="Harper Adams Live Bird Detections",
+    page_title="Harper Adams University Live Bird Detections",
     page_icon="🐦",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -67,26 +68,132 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-      .block-container {max-width: 1280px; padding-top: 1.4rem;}
-      h1 {margin-bottom: 0.15rem;}
-      .subtitle {color: #52645a; font-size: 1.05rem; margin-bottom: 1.1rem;}
-      .live-dot {
-        display: inline-block; width: 0.65rem; height: 0.65rem;
-        border-radius: 50%; background: #2e8b57; margin-right: 0.4rem;
-      }
-      [data-testid="stMetric"] {
-  background: #245c43;
-  border: 1px solid #245c43;
-  border-radius: 0.8rem;
-  padding: 0.75rem 1rem;
+        .block-container {
+            max-width: 1450px !important;
+            width: 94% !important;
+            padding-top: 1.2rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            padding-bottom: 4rem;
+            }
+
+            .title-banner {
+            width: 100%;
+            background: #012169;
+            border-radius: 0.75rem;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.25rem;
+            }
+
+            .dashboard-title {
+            color: #ffffff;
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin: 0;
+            }
+
+            .dashboard-subtitle {
+            color: #dce8f0;
+            font-size: 1.3rem;
+            line-height: 1.2;
+            margin-top: 0.4rem;
+            }
+
+        h1 {margin-bottom: 0.15rem; font-size: 3rem !important;}
+        h2, h3 {font-size: 1.7rem !important;}
+        .subtitle {color: #52645a; font-size: 1.05rem; margin-bottom: 1.35rem;}
+        .live-dot {
+            display: inline-block; width: 0.65rem; height: 0.65rem;
+            border-radius: 50%; background: #2e8b57; margin-right: 0.4rem;
+            }
+        [data-testid="stMetric"] {  background: #f0f2f1;  border: 1px solid #d5dbd7;  border-radius: 0.8rem;  padding: 0.75rem 1rem;}
+        [data-testid="stMetric"] * {  color: #1f2933 !important;}
+        [data-testid="stMetricValue"] {font-size: 2.6rem !important;}
+        [data-testid="stMetricLabel"] p {font-size: 1.15rem !important;}
+
+        .species-name {font-size: 2.5rem; font-weight: 700; line-height: 1.1;}
+        .scientific-name {font-size: 1.25rem; font-style: italic; color: #52645a; margin-bottom: 0.8rem;}
+
+        [data-testid="stCaptionContainer"] p {font-size: 1rem !important;}
+
+        .table-scroll {  max-height: 420px;  overflow-y: auto;  border: 1px solid #c8ceca;  border-radius: 0.5rem;}
+
+        .event-table {  width: 100%;  border-collapse: collapse;  font-size: 18px;}
+
+        .event-table th {  position: sticky;  top: 0;  z-index: 1;  padding: 0.75rem;  text-align: left;  background: #012169;
+            color: #ffffff;  font-size: 18px;  font-weight: 700;  border-bottom: 2px solid #29382f;}
+
+        .event-table td {  padding: 0.7rem 0.75rem;  background: #ffffff;  color: #1f2933;  font-size: 18px;  border-bottom: 1px solid #dfe4e1;}
+
+        .event-table tr:nth-child(even) td {  background: #eef3fa;}
+
+        .event-table tr:hover td {background: #e2ebe5;}
+
+        .bird-count {
+            text-align: center;
+            }
+
+        .bird-count-number {
+            color: #012169;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            }
+
+        .bird-count-label {
+            color: #012169;
+            font-size: 1rem;
+            margin-top: 0.25rem;
+            }
+
+            .bird-card-text {
+  line-height: 1.1;
 }
 
-[data-testid="stMetric"] * {
-  color: white !important;
-}
-      .species-name {font-size: 2rem; font-weight: 700; line-height: 1.1;}
-      .scientific-name {font-style: italic; color: #52645a; margin-bottom: 0.8rem;}
-      footer {visibility: hidden;}
+            .bird-card-name {
+            color: #1f2933;
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin: 0 0 0.15rem 0;
+            }
+
+            .bird-card-scientific {
+            color: #52645a;
+            font-size: 0.95rem;
+            font-style: italic;
+            line-height: 1.1;
+            margin: 0 0 0.25rem 0;
+            }
+
+            .bird-card-events {
+            color: #012169;
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin: 0;
+            }
+
+            .event-table td:nth-child(4) {
+                font-style: italic;
+            }
+
+            .status-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+            }
+
+            .last-checked {
+            color: #52645a;
+            white-space: nowrap;
+            }
+
+        footer {visibility: hidden;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -95,7 +202,7 @@ st.markdown(
 
 def request_detections(period: dict, limit: int = 100) -> dict:
     variables = {
-        "stationIds": [STATION_ID],
+        "stationIds": STATION_IDS,
         "period": period,
         "first": limit,
         "confidenceGte": MIN_CONFIDENCE,
@@ -126,7 +233,8 @@ def flatten_detections(result: dict) -> pd.DataFrame:
                 "common_name": species.get("commonName", "Unknown species"),
                 "scientific_name": species.get("scientificName", ""),
                 "image_url": species.get("imageUrl"),
-                "station_name": station.get("name", f"Station {STATION_ID}"),
+                "station_id": station.get("id"),
+                "station_name": station.get("name", f"Station {station.get('id', 'Unknown')}"),
                 "confidence": item.get("confidence"),
                 "probability": item.get("probability"),
                 "score": item.get("score"),
@@ -148,13 +256,15 @@ def collapse_repeat_detections(
         return frame
 
     frame = frame.sort_values(
-        ["common_name", "timestamp"],
-        ascending=[True, True]
+        ["station_id", "common_name", "timestamp"],
+        ascending=[True, True, True]
     ).copy()
 
     time_since_previous = (
-        frame.groupby("common_name")["timestamp"]
-        .diff()
+    frame.groupby(
+        ["station_id", "common_name"]
+    )["timestamp"]
+    .diff()
     )
 
     keep = (
@@ -170,7 +280,16 @@ def collapse_repeat_detections(
 
 @st.cache_data(ttl=20, show_spinner=False)
 def get_today_data() -> tuple[dict, pd.DataFrame]:
-    result = request_detections({"count": 1, "unit": "day"}, limit=100)
+    today = datetime.now(LOCAL_TZ).date()
+    tomorrow = today + timedelta(days=1)
+
+    result = request_detections(
+        {
+            "from": today.isoformat(),
+            "to": tomorrow.isoformat()
+        },
+        limit=500
+        )
     return result, flatten_detections(result)
 
 
@@ -197,17 +316,54 @@ def time_ago(timestamp: pd.Timestamp) -> str:
 
 
 def recent_table(frame: pd.DataFrame) -> pd.DataFrame:
-    table = frame.head(15).copy()
+    table = frame.copy()
     table["Time"] = table["timestamp"].dt.strftime("%H:%M:%S")
     table["Species"] = table["common_name"]
     table["Scientific name"] = table["scientific_name"]
+    table["Station"] = table["station_name"]
     table["Confidence"] = table["confidence"].map(lambda value: f"{value:.0%}")
     table["Probability"] = table["probability"].map(lambda value: f"{value:.0%}")
-    return table[["Time", "Species", "Scientific name", "Confidence", "Probability"]]
+    return table[["Time", "Station", "Species", "Scientific name", "Confidence", "Probability"]]
+
+def display_bird_card(bird, rank):
+    with st.container(border=True):
+
+        picture, bird_details = st.columns(
+            [0.8, 1.6],
+            vertical_alignment="center"
+        )
+
+        with picture:
+            if pd.notna(bird.image_url) and bird.image_url:
+                st.image(
+                    bird.image_url,
+                    width=80
+                )
+            else:
+                st.markdown("🐦")
+
+        with bird_details:
+            st.markdown(
+        f"""
+        <div class="bird-card-text">
+            <div class="bird-card-name">
+                {rank}. {bird.common_name}
+            </div>
+            <div class="bird-card-scientific">
+                {bird.scientific_name}
+            </div>
+            <div class="bird-card-events">
+                {bird.detection_events} events
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 def render_dashboard() -> None:
     checked_at = datetime.now(LOCAL_TZ)
+    active_date = f"{checked_at.day} {checked_at:%B %Y}"
     try:
         summary, detections = get_today_data()
         detections = collapse_repeat_detections(detections)
@@ -228,23 +384,27 @@ def render_dashboard() -> None:
         except Exception:
             detections = pd.DataFrame()
 
-    station_name = (
-        detections.iloc[0]["station_name"]
-        if not detections.empty
-        else f"BirdWeather station {STATION_ID}"
-    )
+    if not detections.empty:
+        station_details = (
+            detections[
+                ["station_name", "station_id"]
+                ]
+                .dropna()
+                .drop_duplicates()
+                .sort_values("station_name")
+            )
 
-    st.markdown(
-        f'<span class="live-dot"></span> Checking <strong>{station_name}</strong> '
-        f'every {REFRESH_SECONDS} seconds',
-        unsafe_allow_html=True,
-    )
-    st.caption(f"Last checked {checked_at:%H:%M:%S} · Station ID {STATION_ID}")
+        station_label = " and ".join(
+            f"{row.station_name} ({row.station_id})"
+            for row in station_details.itertuples()
+        )
+    else:
+        station_label = f"{len(STATION_IDS)} BirdWeather stations"
 
     if showing_archive:
         latest_date = detections.iloc[0]["timestamp"].strftime("%d %B %Y")
         st.warning(
-            "No qualifying detections were received in the last 24 hours. "
+            "No qualifying detections were received today. "
             f"Showing an archive preview from the station; the latest is dated {latest_date}."
         )
     elif detections.empty:
@@ -253,65 +413,177 @@ def render_dashboard() -> None:
             "new detections will appear here automatically."
         )
 
-    metrics = st.columns(2)
-    metrics[0].metric("Total Detections · last 24 hours", int(summary.get("totalCount", 0)))
-    metrics[1].metric("Total Species · last 24 hours", int(summary.get("speciesCount", 0)))
-    
     if detections.empty:
         return
 
     latest = detections.iloc[0]
-    left, right = st.columns([1.15, 2], gap="large")
 
-    with left:
-        if latest.get("image_url"):
-            st.image(latest["image_url"], use_container_width=True)
-        st.markdown(
-            f'<div class="species-name">{latest["common_name"]}</div>'
-            f'<div class="scientific-name">{latest["scientific_name"]}</div>',
-            unsafe_allow_html=True,
-        )
-        st.write(f'Latest detection: **{time_ago(latest["timestamp"])}**')
-        st.caption(
-            f'Confidence {latest["confidence"]:.0%} · '
-            f'Probability {latest["probability"]:.0%}'
-        )
 
-    with right:
-        st.subheader("Recent detection events" if not showing_archive else "Archive preview")
-        st.dataframe(
-            recent_table(detections),
-            hide_index=True,
-            use_container_width=True,
-            height=370,
-        )
+# ── Top section ──────────────────────────────────────────────────
 
-    if not showing_archive:
-        st.subheader("Most frequent detection events today")
-        top_species = (
-            detections.groupby("common_name")
-            .size()
-            .sort_values(ascending=False)
-            .head(8)
-            .rename("Detections")
-        )
-        st.bar_chart(top_species, horizontal=True, color="#2e8b57")
-
-    st.caption(
-        f"Only detections with confidence and probability of at least "
-        f"{MIN_CONFIDENCE:.0%} and {MIN_PROBABILITY:.0%}, respectively, are shown. "
-        "Automated acoustic classifications should be treated as indicative until verified."
-        f"Repeated detections of the same species within "
-        f"{REPEAT_WINDOW_MINUTES} minutes are displayed as one event. "
+    latest_column, top_birds_column,= st.columns(
+        [1, 1],
+        gap="large"
     )
 
 
-st.title("Harper Adams Live Bird Detections")
-st.markdown(
-    '<div class="subtitle">What is the landscape telling us right now?</div>',
-    unsafe_allow_html=True,
-)
+# ── Left: top five species ───────────────────────────────────────
 
+    with top_birds_column:
+        st.subheader("Top species by detection events")
+
+        if not showing_archive:
+
+            top_birds = (
+                detections
+                .groupby(
+                    [
+                        "common_name",
+                        "scientific_name",
+                        "image_url"
+                    ],
+                    dropna=False
+                )
+                .size()
+                .reset_index(name="detection_events")
+                .sort_values(
+                    "detection_events",
+                    ascending=False
+                )
+                .head(10)
+            )
+
+            bird_column_one, bird_column_two = st.columns(
+                2,
+                gap="small"
+            )
+
+            with bird_column_one:
+                for rank, bird in enumerate(
+                    top_birds.iloc[:5].itertuples(),
+                    start=1
+                ):
+                    display_bird_card(bird, rank)
+
+            with bird_column_two:
+                for rank, bird in enumerate(
+                    top_birds.iloc[5:10].itertuples(),
+                    start=6
+                ):
+                    display_bird_card(bird, rank)
+
+
+# ── Right: metrics, latest species and status ────────────────────
+
+    with latest_column:
+        st.subheader("Latest Detection Summary")
+        metric_one, metric_two = st.columns(2)
+
+        metric_one.metric(
+            f"Raw detections · {active_date}",
+            int(summary.get("totalCount", 0))
+        )
+
+        metric_two.metric(
+            f"Species detected · {active_date}",
+            int(summary.get("speciesCount", 0))
+        )
+
+
+        # Latest species
+
+        with st.container(border=True):
+
+            bird_image, bird_details = st.columns(
+                [1.25, 1],
+                gap="medium",
+                vertical_alignment="center"
+            )
+
+            with bird_image:
+                if latest.get("image_url"):
+                    st.image(
+                        latest["image_url"],
+                        use_container_width=True
+                    )
+
+            with bird_details:
+                st.caption("LATEST SPECIES DETECTED")
+
+                st.markdown(
+                    f'<div class="species-name">'
+                    f'{latest["common_name"]}'
+                    f'</div>'
+                    f'<div class="scientific-name">'
+                    f'{latest["scientific_name"]}'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+                st.write(
+                    f'**Detected {time_ago(latest["timestamp"])}**'
+                )
+
+                st.caption(
+                    f'Confidence {latest["confidence"]:.0%}  \n'
+                    f'Probability {latest["probability"]:.0%}'
+                )
+
+
+    # Live status directly beneath latest species
+
+        with st.container(border=True):
+            st.markdown(
+                f"""
+                <div class="status-heading">
+                    <div>
+                        <span class="live-dot"></span>
+                        <strong>Live status</strong>
+                    </div>
+                    <div class="last-checked">
+                        <strong>Last checked:</strong>
+                        {checked_at:%H:%M:%S}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            st.write(station_label)
+
+# ── Full-width detection-events table ────────────────────────────
+
+    st.subheader(
+        "Today's detection events"
+        if not showing_archive
+        else "Archive preview"
+    )
+
+    table_data = recent_table(detections)
+
+    table_html = table_data.to_html(
+        index=False,
+        classes="event-table",
+        border=0,
+        escape=True
+    )
+
+    st.markdown(
+        f'<div class="table-scroll">{table_html}</div>',
+        unsafe_allow_html=True
+    )
+
+
+st.markdown(
+    """
+    <div class="title-banner">
+        <div class="dashboard-title">
+            Harper Adams Live Bird Detections
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 @st.fragment(run_every=f"{REFRESH_SECONDS}s")
 def live_fragment() -> None:
