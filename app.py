@@ -88,18 +88,18 @@ st.markdown(
 
 
         h1 {margin-bottom: 0.15rem; font-size: 2rem !important;}
-        h2, h3 {font-size: 1.7rem !important;}
-        .subtitle {color: #52645a; font-size: 1.05rem; margin-bottom: 1.35rem;}
+        h2, h3 {font-size: 1.5rem !important;}
+        .subtitle {color: #52645a; font-size: 1.rem; margin-bottom: 1.35rem;}
         .live-dot {
             display: inline-block; width: 0.65rem; height: 0.65rem;
             border-radius: 50%; background: #2e8b57; margin-right: 0.4rem;
             }
         [data-testid="stMetric"] {  background: #f0f2f1;  border: 1px solid #d5dbd7;  border-radius: 0.8rem;  padding: 0.75rem 1rem;}
         [data-testid="stMetric"] * {  color: #1f2933 !important;}
-        [data-testid="stMetricValue"] {font-size: 2.6rem !important;}
+        [data-testid="stMetricValue"] {font-size: 2rem !important;}
         [data-testid="stMetricLabel"] p {font-size: 1.15rem !important;}
 
-        .species-name {font-size: 2.5rem; font-weight: 700; line-height: 1.1;}
+        .species-name {font-size: 2rem; font-weight: 700; line-height: 1.1;}
         .scientific-name {font-size: 1.25rem; font-style: italic; color: #52645a; margin-bottom: 0.8rem;}
 
         [data-testid="stCaptionContainer"] p {font-size: 1rem !important;}
