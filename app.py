@@ -76,28 +76,16 @@ st.markdown(
             padding-bottom: 4rem;
             }
 
-            .title-banner {
-            width: 100%;
-            background: #012169;
-            border-radius: 0.75rem;
-            padding: 1.2rem 1.5rem;
-            margin-bottom: 1.25rem;
-            }
 
             .dashboard-title {
-            color: #ffffff;
+            color: #012169;
             font-size: 2.8rem;
             font-weight: 700;
             line-height: 1.1;
             margin: 0;
             }
 
-            .dashboard-subtitle {
-            color: #dce8f0;
-            font-size: 1.3rem;
-            line-height: 1.2;
-            margin-top: 0.4rem;
-            }
+
 
         h1 {margin-bottom: 0.15rem; font-size: 3rem !important;}
         h2, h3 {font-size: 1.7rem !important;}
