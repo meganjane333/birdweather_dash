@@ -561,16 +561,7 @@ def render_dashboard() -> None:
     )
 
 
-st.markdown(
-    """
-    <div class="title-banner">
-        <div class="dashboard-title">
-            Harper Adams Live Bird Detections
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.title("Harper Adams University Live Bird Detections")
 
 @st.fragment(run_every=f"{REFRESH_SECONDS}s")
 def live_fragment() -> None:
