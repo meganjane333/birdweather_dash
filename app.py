@@ -9,7 +9,7 @@ import streamlit as st
 
 
 API_URL = "https://app.birdweather.com/graphql"
-STATION_IDS = ["12521", "8106"]
+STATION_IDS = ["12521", "8106", "12664"]
 REFRESH_SECONDS = 30
 MIN_CONFIDENCE = 0.50
 MIN_PROBABILITY = 0.50
@@ -339,7 +339,7 @@ def display_bird_card(bird, rank):
 
 def render_dashboard() -> None:
     checked_at = datetime.now(LOCAL_TZ)
-    active_date = f"{checked_at.day} {checked_at:%B %Y}"
+    active_date = f"{checked_at.day} {checked_at:%b %Y}"
     try:
         summary, detections = get_today_data()
         detections = collapse_repeat_detections(detections)
@@ -406,7 +406,7 @@ def render_dashboard() -> None:
 # ── Left: top five species ───────────────────────────────────────
 
     with top_birds_column:
-        st.subheader("Top species by detection events")
+        st.subheader("Top species by Detection Events")
 
         if not showing_archive:
 
@@ -517,7 +517,7 @@ def render_dashboard() -> None:
                         <strong>Live status</strong>
                     </div>
                     <div class="last-checked">
-                        <strong>Last checked:</strong>
+                        <strong>Last retrieved from BirdWeather:</strong>
                         {checked_at:%H:%M:%S}
                     </div>
                 </div>
@@ -525,12 +525,12 @@ def render_dashboard() -> None:
                 unsafe_allow_html=True
             )
 
-            st.write(station_label)
+            st.write(f"**Stations:** station_label")
 
 # ── Full-width detection-events table ────────────────────────────
 
     st.subheader(
-        "Today's detection events"
+        "Today's Detection Events"
         if not showing_archive
         else "Archive preview"
     )
