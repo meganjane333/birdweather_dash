@@ -313,7 +313,7 @@ def display_bird_card(bird, rank):
             if pd.notna(bird.image_url) and bird.image_url:
                 st.image(
                     bird.image_url,
-                    width=80
+                    width=85
                 )
             else:
                 st.markdown("🐦")
