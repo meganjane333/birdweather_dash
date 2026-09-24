@@ -446,8 +446,9 @@ def render_dashboard() -> None:
                     ["n_events", "n_obs"],
                     ascending=[False, False]
                 )
-                .head(10)
+                .reset_index(drop=True)
             )
+            
 
             bird_column_one, bird_column_two = st.columns(
                 2,
