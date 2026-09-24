@@ -83,8 +83,8 @@ st.markdown(
             display: inline-block; width: 0.65rem; height: 0.65rem;
             border-radius: 50%; background: #2e8b57; margin-right: 0.4rem;
             }
-        [data-testid="stMetric"] {  background: #f0f2f1;  border: 1px solid #d5dbd7;  border-radius: 0.8rem;  padding: 0.75rem 1rem;}
-        [data-testid="stMetric"] * {  color: #1f2933 !important;}
+        [data-testid="stMetric"] {  background: #012169;  border: 1px solid #d5dbd7;  border-radius: 0.8rem;  padding: 0.75rem 1rem;}
+        [data-testid="stMetric"] * {  color: #ffffff !important;}
         [data-testid="stMetricValue"] {font-size: 2rem !important;}
         [data-testid="stMetricLabel"] p {font-size: 1.15rem !important;}
 
@@ -104,7 +104,7 @@ st.markdown(
 
         .event-table tr:nth-child(even) td {  background: #eef3fa;}
 
-        .event-table tr:hover td {background: #e2ebe5;}
+        .event-table tr:hover td {background: #dbe6f7;}
 
         .bird-count {
             text-align: center;
