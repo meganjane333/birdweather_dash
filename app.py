@@ -313,7 +313,7 @@ def display_bird_card(bird, rank):
             if pd.notna(bird.image_url) and bird.image_url:
                 st.image(
                     bird.image_url,
-                    width=70
+                    width=80
                 )
             else:
                 st.markdown("🐦")
@@ -547,6 +547,14 @@ def render_dashboard() -> None:
             )
 
             st.write(f"**Stations:** {station_label}")
+
+            st.caption(
+                f"Only detections with confidence and probability of at least "
+                f"50% are shown. "
+                "Automated acoustic classifications should be treated as indicative until verified. "
+                f"Repeated detections of the same species within "
+                f"{REPEAT_WINDOW_MINUTES} minutes are displayed as one event."
+            )
 
 # ── Full-width detection-events table ────────────────────────────
 
