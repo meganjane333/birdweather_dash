@@ -406,7 +406,7 @@ def render_dashboard() -> None:
 # ── Left: top five species ───────────────────────────────────────
 
     with top_birds_column:
-        st.subheader("Top species by Detection Events")
+        st.subheader("Top Species by Detection Events")
 
         if not showing_archive:
 
