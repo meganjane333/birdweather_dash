@@ -329,7 +329,7 @@ def display_bird_card(bird, rank):
                 {bird.scientific_name}
             </div>
             <div class="bird-card-events">
-                {bird.detection_events} events
+                {bird.n_events} events · {bird.n_obs} detections 
             </div>
         </div>
         """,
@@ -341,8 +341,8 @@ def render_dashboard() -> None:
     checked_at = datetime.now(LOCAL_TZ)
     active_date = f"{checked_at.day} {checked_at:%b %Y}"
     try:
-        summary, detections = get_today_data()
-        detections = collapse_repeat_detections(detections)
+        summary, raw_detections = get_today_data()
+        detections = collapse_repeat_detections(raw_detections)
     except Exception as error:
         st.error(
             "BirdWeather could not be reached on this refresh. "
@@ -354,8 +354,8 @@ def render_dashboard() -> None:
     showing_archive = False
     if detections.empty:
         try:
-            _, detections = get_archive_preview()
-            detections = collapse_repeat_detections(detections)
+            _, raw_detections = get_archive_preview()
+            detections = collapse_repeat_detections(raw_detections)
             showing_archive = not detections.empty
         except Exception:
             detections = pd.DataFrame()
@@ -410,21 +410,41 @@ def render_dashboard() -> None:
 
         if not showing_archive:
 
-            top_birds = (
+            species_columns = [
+                "common_name",
+                "scientific_name"
+            ]
+
+            event_counts = (
                 detections
                 .groupby(
-                    [
-                        "common_name",
-                        "scientific_name",
-                        "image_url"
-                    ],
+                    species_columns + ["image_url"],
                     dropna=False
                 )
                 .size()
-                .reset_index(name="detection_events")
+                .reset_index(name="n_events")
+            )
+
+            observation_counts = (
+                raw_detections
+                .groupby(
+                    species_columns,
+                    dropna=False
+                )
+                .size()
+                .reset_index(name="n_obs")
+            )
+
+            top_birds = (
+                event_counts
+                .merge(
+                    observation_counts,
+                    on=species_columns,
+                    how="left"
+                )
                 .sort_values(
-                    "detection_events",
-                    ascending=False
+                    ["n_events", "n_obs"],
+                    ascending=[False, False]
                 )
                 .head(10)
             )
@@ -525,7 +545,7 @@ def render_dashboard() -> None:
                 unsafe_allow_html=True
             )
 
-            st.write(f"**Stations:** station_label")
+            st.write(f"**Stations:** {station_label}")
 
 # ── Full-width detection-events table ────────────────────────────
 
