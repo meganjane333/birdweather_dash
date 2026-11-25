@@ -9,7 +9,7 @@ import streamlit as st
 
 
 API_URL = "https://app.birdweather.com/graphql"
-STATION_IDS = ["12521", "8106", "12664"]
+STATION_IDS = ["12521", "8106", "12664", "32218"]
 REFRESH_SECONDS = 30
 MIN_CONFIDENCE = 0.50
 MIN_PROBABILITY = 0.50
