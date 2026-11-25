@@ -30,7 +30,8 @@ query LiveDetections(
     period: $period,
     first: $first,
     confidenceGte: $confidenceGte,
-    probabilityGte: $probabilityGte
+    probabilityGte: $probabilityGte,
+    classifications: ["avian"]
   ) {
     totalCount
     speciesCount
